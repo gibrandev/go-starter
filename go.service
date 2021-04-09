@@ -1,0 +1,12 @@
+[Unit]
+Description=go-run
+
+[Service]
+Type=simple
+#Restart=always
+#RestartSec=5s
+WorkingDirectory=/home/dev/go
+ExecStart=/home/dev/go/m
+
+[Install]
+WantedBy=multi-user.target
