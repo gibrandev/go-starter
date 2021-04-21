@@ -1,19 +1,20 @@
 package libs
 
 import (
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"example.com/m/database"
 	"example.com/m/models"
-	"fmt"
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"log"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 // Middleware
