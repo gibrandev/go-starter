@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"example.com/m/controllers"
 	"example.com/m/database"
 	"example.com/m/libs"
 	"example.com/m/models"
-	"log"
 
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"

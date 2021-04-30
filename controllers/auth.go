@@ -93,6 +93,7 @@ func AuthRegister(c *gin.Context) {
 
 	result := tx.Create(&user)
 	if result.RowsAffected > 0 {
+		libs.SendEmail(email)
 		tx.Commit()
 		c.JSON(200, gin.H{
 			"message": "User has registered",

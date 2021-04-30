@@ -14,6 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +33,7 @@ func Authorization(c *gin.Context) {
 		if jwt.GetSigningMethod("HS256") != token.Method {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(viper.Get("JWT_SECRET").(string)), nil
+		return []byte(viper.GetString("JWT_SECRET")), nil
 	})
 	// Check user exist or not
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -78,7 +79,7 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 		Ip:  ip,
 		Iss: iss,
 	}
-	if viper.Get("MULTIPLE_LOGIN").(string) == "false" {
+	if viper.GetBool("MULTIPLE_LOGIN") == false {
 		// Delete old token
 		database.DB.Where("sub = ?", sub).Delete(&saveToken)
 	}
@@ -100,12 +101,13 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 		return nil
 	}
 }
+
 func Logout(c *gin.Context) bool {
 	var token models.Token
 	tokenString := c.Request.Header.Get("Authorization")
 	getSub := ParseToken(tokenString)
 	if getSub != nil {
-		if viper.Get("MULTIPLE_LOGIN").(string) == "false" {
+		if viper.GetBool("MULTIPLE_LOGIN") == false {
 			// Delete old token
 			database.DB.Where("sub = ?", getSub).Delete(&token)
 		} else {
@@ -122,7 +124,7 @@ func ParseToken(tokenString string) interface{} {
 		if jwt.GetSigningMethod("HS256") != token.Method {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(viper.Get("JWT_SECRET").(string)), nil
+		return []byte(viper.GetString("JWT_SECRET")), nil
 	})
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		jti := claims["jti"]
@@ -131,6 +133,7 @@ func ParseToken(tokenString string) interface{} {
 		return nil
 	}
 }
+
 func FormatingErrors(err error) map[string]string {
 	errors, _ := err.(validator.ValidationErrors)
 	e := make(map[string]string)
@@ -139,6 +142,7 @@ func FormatingErrors(err error) map[string]string {
 	}
 	return e
 }
+
 func HashAndSalt(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	if err != nil {
@@ -146,6 +150,7 @@ func HashAndSalt(pwd []byte) string {
 	}
 	return string(hash)
 }
+
 func ComparePasswords(hashedPwd string, plainPwd []byte) bool {
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
@@ -174,4 +179,22 @@ func Paginate(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 		offset := (page - 1) * pageSize
 		return db.Offset(offset).Limit(pageSize)
 	}
+}
+
+func SendEmail(email string) bool {
+	m := gomail.NewMessage()
+	m.SetHeader("From", "alex@example.com")
+	m.SetHeader("To", "bob@example.com", "cora@example.com")
+	m.SetAddressHeader("Cc", "dan@example.com", "Dan")
+	m.SetHeader("Subject", "Hello!")
+	m.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
+	// m.Attach("/home/Alex/lolcat.jpg")
+
+	d := gomail.NewDialer(viper.GetString("MAIL_HOST"), viper.GetInt("MAIL_PORT"), viper.GetString("MAIL_USERNAME"), viper.GetString("MAIL_PASSWORD"))
+
+	if err := d.DialAndSend(m); err != nil {
+		// panic(err)
+		return false
+	}
+	return true
 }
