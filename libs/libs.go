@@ -183,7 +183,7 @@ func Paginate(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 
 func SendEmail(email string) bool {
 	m := gomail.NewMessage()
-	m.SetHeader("From", "alex@example.com")
+	m.SetHeader("From", m.FormatAddress(viper.GetString("MAIL_FROM_ADDRESS"), viper.GetString("MAIL_FROM_NAME")))
 	m.SetHeader("To", email)
 	// m.SetAddressHeader("Cc", "dan@example.com", "Dan")
 	m.SetHeader("Subject", "Hello!")
