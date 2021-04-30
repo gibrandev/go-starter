@@ -105,8 +105,15 @@ func AuthRegister(c *gin.Context) {
 		})
 	}
 }
+
+func AuthUser(c *gin.Context) {
+	user, _ := c.Get("user")
+	c.JSON(200, user)
+}
+
 func AuthLogout(c *gin.Context) {
 	logout := libs.Logout(c)
+	c.Set("user", nil)
 	if logout {
 		c.JSON(200, gin.H{
 			"message": "User has logout",

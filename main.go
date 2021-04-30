@@ -48,6 +48,8 @@ func main() {
 		v1.POST("/login", controllers.AuthLogin)
 		v1.POST("/register", controllers.AuthRegister)
 		v1.GET("/logout", libs.Authorization, controllers.AuthLogout)
+		v1.GET("/me", libs.Authorization, controllers.AuthUser)
+
 		v1.GET("/users", libs.Authorization, controllers.UserIndex)
 		v1.POST("/users", libs.Authorization, controllers.UserPost)
 		v1.PATCH("/users/:id", libs.Authorization, controllers.UserPatch)
