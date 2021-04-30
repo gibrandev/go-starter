@@ -79,7 +79,7 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 		Ip:  ip,
 		Iss: iss,
 	}
-	if viper.GetBool("MULTIPLE_LOGIN") == false {
+	if !viper.GetBool("MULTIPLE_LOGIN") {
 		// Delete old token
 		database.DB.Where("sub = ?", sub).Delete(&saveToken)
 	}
@@ -107,7 +107,7 @@ func Logout(c *gin.Context) bool {
 	tokenString := c.Request.Header.Get("Authorization")
 	getSub := ParseToken(tokenString)
 	if getSub != nil {
-		if viper.GetBool("MULTIPLE_LOGIN") == false {
+		if !viper.GetBool("MULTIPLE_LOGIN") {
 			// Delete old token
 			database.DB.Where("sub = ?", getSub).Delete(&token)
 		} else {
