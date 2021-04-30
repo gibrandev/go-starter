@@ -25,7 +25,7 @@ func main() {
 	}
 	router := gin.Default()
 	// DB Connection
-	dsn := "" + viper.Get("DB_USERNAME").(string) + ":" + viper.Get("DB_PASSWORD").(string) + "@tcp(" + viper.Get("DB_HOST").(string) + ":" + viper.Get("DB_PORT").(string) + ")/" + viper.Get("DB_DATABASE").(string) + "?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "" + viper.GetString("DB_USERNAME") + ":" + viper.GetString("DB_PASSWORD") + "@tcp(" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + ")/" + viper.GetString("DB_DATABASE") + "?charset=utf8mb4&parseTime=True&loc=Local"
 	database.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -54,7 +54,7 @@ func main() {
 		v1.GET("/users/:id", libs.Authorization, controllers.UserShow)
 		v1.DELETE("/users/:id", libs.Authorization, controllers.UserDelete)
 	}
-	err = router.Run(":" + viper.Get("APP_PORT").(string))
+	err = router.Run(":" + viper.GetString("APP_PORT"))
 	if err != nil {
 		panic(err)
 	}
