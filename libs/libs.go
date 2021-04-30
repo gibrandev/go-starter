@@ -184,8 +184,8 @@ func Paginate(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 func SendEmail(email string) bool {
 	m := gomail.NewMessage()
 	m.SetHeader("From", "alex@example.com")
-	m.SetHeader("To", "bob@example.com", "cora@example.com")
-	m.SetAddressHeader("Cc", "dan@example.com", "Dan")
+	m.SetHeader("To", email)
+	// m.SetAddressHeader("Cc", "dan@example.com", "Dan")
 	m.SetHeader("Subject", "Hello!")
 	m.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
 	// m.Attach("/home/Alex/lolcat.jpg")
