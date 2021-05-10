@@ -18,7 +18,9 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/google/uuid v1.2.0
+	github.com/googollee/go-socket.io v1.4.5 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20210420193930-a4630ec28c79 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.2 // indirect
