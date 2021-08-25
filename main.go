@@ -1,8 +1,9 @@
 package main
 
 import (
-	socketio "github.com/googollee/go-socket.io"
 	"log"
+
+	socketio "github.com/googollee/go-socket.io"
 
 	"example.com/m/controllers"
 	"example.com/m/database"
@@ -10,7 +11,7 @@ import (
 	"example.com/m/models"
 
 	"github.com/spf13/viper"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
@@ -26,8 +27,11 @@ func main() {
 	}
 	router := gin.Default()
 	// DB Connection
-	dsn := "" + viper.GetString("DB_USERNAME") + ":" + viper.GetString("DB_PASSWORD") + "@tcp(" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + ")/" + viper.GetString("DB_DATABASE") + "?charset=utf8mb4&parseTime=True&loc=Local"
-	database.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	dsn := "host=" + viper.GetString("DB_HOST") + " user=" + viper.GetString("DB_USERNAME") + " password=" + viper.GetString("DB_PASSWORD") + " dbname=" + viper.GetString("DB_DATABASE") + " port=" + viper.GetString("DB_PORT") + " sslmode=disable TimeZone=Asia/Jakarta"
+	database.DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true, // disables implicit prepared statement usage
+	}), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
