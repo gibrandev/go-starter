@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"example.com/m/database"
-	"example.com/m/libs"
-	"example.com/m/models"
+	"engine/database"
+	"engine/libs"
+	"engine/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )

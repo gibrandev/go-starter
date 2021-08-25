@@ -5,10 +5,10 @@ import (
 
 	socketio "github.com/googollee/go-socket.io"
 
-	"example.com/m/controllers"
-	"example.com/m/database"
-	"example.com/m/libs"
-	"example.com/m/models"
+	"engine/controllers"
+	"engine/database"
+	"engine/libs"
+	"engine/models"
 
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"

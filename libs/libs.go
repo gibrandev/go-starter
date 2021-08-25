@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"example.com/m/database"
-	"example.com/m/models"
+	"engine/database"
+	"engine/models"
+
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

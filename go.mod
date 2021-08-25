@@ -1,4 +1,4 @@
-module example.com/m
+module engine
 
 go 1.15
 
