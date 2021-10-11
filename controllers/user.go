@@ -4,8 +4,10 @@ import (
 	"engine/database"
 	"engine/libs"
 	"engine/models"
+	"errors"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func UserIndex(c *gin.Context) {
@@ -49,6 +51,12 @@ func UserPatch(c *gin.Context) {
 	}
 
 	result := database.DB.First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		c.JSON(404, gin.H{
+			"message": "User not found",
+		})
+		return
+	}
 	if result.RowsAffected > 0 {
 		user.Name = name
 		user.Email = email
@@ -57,10 +65,12 @@ func UserPatch(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "User has updated",
 		})
+		return
 	} else {
 		c.JSON(400, gin.H{
 			"message": "User failed to update",
 		})
+		return
 	}
 }
 
@@ -68,6 +78,12 @@ func UserShow(c *gin.Context) {
 	var user models.User
 	id := c.Param("id")
 	result := database.DB.Where("id = ?", id).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		c.JSON(404, gin.H{
+			"message": "User not found",
+		})
+		return
+	}
 	if result.Error == nil {
 		c.JSON(200, user)
 	} else {

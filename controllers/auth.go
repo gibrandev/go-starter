@@ -4,9 +4,11 @@ import (
 	"engine/database"
 	"engine/libs"
 	"engine/models"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
 type Login struct {
@@ -40,6 +42,12 @@ func AuthLogin(c *gin.Context) {
 
 	// Query
 	result := database.DB.Where("email = ?", email).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		c.JSON(404, gin.H{
+			"message": "User not found",
+		})
+		return
+	}
 	if result.Error != nil {
 		c.JSON(400, gin.H{
 			"message": "User invalid",
@@ -54,15 +62,18 @@ func AuthLogin(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"token": token,
 			})
+			return
 		} else {
 			c.JSON(400, gin.H{
 				"message": "Failed generate token",
 			})
+			return
 		}
 	} else {
 		c.JSON(400, gin.H{
 			"message": "Password invalid",
 		})
+		return
 	}
 }
 
@@ -99,11 +110,13 @@ func AuthRegister(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "User has registered",
 		})
+		return
 	} else {
 		tx.Rollback()
 		c.JSON(400, gin.H{
 			"message": "User failed to register",
 		})
+		return
 	}
 }
 
@@ -119,9 +132,11 @@ func AuthLogout(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "User has logout",
 		})
+		return
 	} else {
 		c.JSON(401, gin.H{
 			"message": "User failed logout",
 		})
+		return
 	}
 }
