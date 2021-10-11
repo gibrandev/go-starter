@@ -28,6 +28,7 @@ func Authorization(c *gin.Context) {
 			"message": "Invalid header authorization",
 		})
 		c.Abort()
+		return
 	}
 	// Validate token
 	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -41,6 +42,7 @@ func Authorization(c *gin.Context) {
 			"message": "not authorized",
 		})
 		c.Abort()
+		return
 	}
 	// Check user exist or not
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -63,18 +65,21 @@ func Authorization(c *gin.Context) {
 					"message": "Invalid user",
 				})
 				c.Abort()
+				return
 			}
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid token",
 			})
 			c.Abort()
+			return
 		}
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "not authorized",
 		})
 		c.Abort()
+		return
 	}
 }
 
