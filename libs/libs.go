@@ -36,6 +36,12 @@ func Authorization(c *gin.Context) {
 		}
 		return []byte(viper.GetString("JWT_SECRET")), nil
 	})
+	if token == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "not authorized",
+		})
+		c.Abort()
+	}
 	// Check user exist or not
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		var user models.User
