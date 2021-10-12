@@ -6,4 +6,5 @@ Go lang with framework GIN, create architecture MVC.
 4. ORM with GORM
 
 ### Running
-1. run development in terminal `air`
+1. Copy `.env.example` to `.env`
+2. Run development in terminal with command `air`
