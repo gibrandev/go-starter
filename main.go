@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 
-	socketio "github.com/googollee/go-socket.io"
-
 	"engine/controllers"
 	"engine/database"
 	"engine/libs"
@@ -42,46 +40,6 @@ func main() {
 	}
 	// Cors
 	router.Use(cors.Default())
-
-	// Socket io
-	server := socketio.NewServer(nil)
-
-	//Add all connected user to a room
-	server.OnConnect("/", func(s socketio.Conn) error {
-		s.SetContext("")
-		url := s.URL()
-		room := url.Query().Get("room")
-		s.Join(room)
-		return nil
-	})
-
-	server.OnEvent("/", "message", func(s socketio.Conn, msg string) {
-		log.Println("message: ", msg)
-		url := s.URL()
-		room := url.Query().Get("room")
-		server.BroadcastToRoom("", room, "message", msg)
-	})
-
-	server.OnEvent("/", "disconnect", func(s socketio.Conn) string {
-		last := s.Context().(string)
-		s.Emit("bye", last)
-		s.Close()
-		return last
-	})
-
-	server.OnError("/", func(s socketio.Conn, e error) {
-		log.Println("meet error:", e)
-	})
-
-	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		log.Println("closed", reason)
-	})
-
-	go server.Serve()
-	defer server.Close()
-
-	router.GET("/socket.io/*any", gin.WrapH(server))
-	router.POST("/socket.io/*any", gin.WrapH(server))
 
 	// Start router
 	router.GET("/", func(c *gin.Context) {

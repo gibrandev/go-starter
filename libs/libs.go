@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"engine/database"
@@ -31,12 +33,7 @@ func Authorization(c *gin.Context) {
 		return
 	}
 	// Validate token
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod("HS256") != token.Method {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(viper.GetString("JWT_SECRET")), nil
-	})
+	token := ValidateToken(tokenString)
 	if token == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "not authorized",
@@ -44,6 +41,7 @@ func Authorization(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
 	// Check user exist or not
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		var user models.User
@@ -114,6 +112,58 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 	}
 }
 
+func ParseToken(tokenString string) interface{} {
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if jwt.GetSigningMethod("HS256") != token.Method {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(viper.GetString("JWT_SECRET")), nil
+	})
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		jti := claims["jti"]
+		return jti
+	} else {
+		return nil
+	}
+}
+
+func ValidateToken(tokenString string) *jwt.Token {
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if jwt.GetSigningMethod("HS256") != token.Method {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(viper.GetString("JWT_SECRET")), nil
+	})
+	return token
+}
+
+// func CheckTokenDb(c *gin.Context, token *jwt.Token) bool {
+// 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+// 		var user models.User
+// 		var token models.Token
+// 		sub := claims["sub"]
+// 		jti := claims["jti"]
+// 		// Check token exist or not
+// 		resultToken := database.DB.Where("id = ?", jti).First(&token)
+// 		if resultToken.Error == nil && token.Sub == sub {
+// 			result := database.DB.Where("id = ?", sub).First(&user)
+// 			if result.Error == nil {
+// 				now := time.Now()
+// 				token.LastAccessAt = &now
+// 				token.Ip = c.ClientIP()
+// 				database.DB.Save(&token)
+// 				return true
+// 			} else {
+// 				return false
+// 			}
+// 		} else {
+// 			return false
+// 		}
+// 	} else {
+// 		return false
+// 	}
+// }
+
 func Logout(c *gin.Context) bool {
 	var token models.Token
 	tokenString := c.Request.Header.Get("Authorization")
@@ -128,21 +178,6 @@ func Logout(c *gin.Context) bool {
 		return true
 	} else {
 		return false
-	}
-}
-
-func ParseToken(tokenString string) interface{} {
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod("HS256") != token.Method {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(viper.GetString("JWT_SECRET")), nil
-	})
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		jti := claims["jti"]
-		return jti
-	} else {
-		return nil
 	}
 }
 
@@ -209,4 +244,14 @@ func SendEmail(email string) bool {
 		return false
 	}
 	return true
+}
+
+func GetChatId(query string) string {
+	get := url.URL{
+		RawQuery: query,
+	}
+	value := get.Query()
+	chatId := value["chatId"]
+	str := strings.Join(chatId, ", ")
+	return str
 }
