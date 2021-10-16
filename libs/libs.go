@@ -113,12 +113,7 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 }
 
 func ParseToken(tokenString string) interface{} {
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod("HS256") != token.Method {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(viper.GetString("JWT_SECRET")), nil
-	})
+	token := ValidateToken(tokenString)
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		jti := claims["jti"]
 		return jti
