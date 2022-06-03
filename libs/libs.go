@@ -115,8 +115,11 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 func ParseToken(tokenString string) interface{} {
 	token := ValidateToken(tokenString)
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		jti := claims["jti"]
-		return jti
+		if !viper.GetBool("MULTIPLE_LOGIN") {
+			return claims["sub"]
+		} else {
+			return claims["jti"]
+		}
 	} else {
 		return nil
 	}
