@@ -10,9 +10,9 @@ import (
 	"engine/database"
 	"engine/models"
 
-	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
@@ -79,7 +79,6 @@ func Authorization(c *gin.Context) {
 }
 
 func GenerateToken(sub string, iss string, c *gin.Context) *string {
-	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	ip := c.ClientIP()
 	saveToken := models.Token{
 		Sub: sub,
@@ -93,12 +92,16 @@ func GenerateToken(sub string, iss string, c *gin.Context) *string {
 	// Create token
 	result := database.DB.Create(&saveToken)
 	if result.RowsAffected > 0 {
-		token.Claims.(jwt.MapClaims)["jti"] = saveToken.ID
-		token.Claims.(jwt.MapClaims)["sub"] = sub
-		token.Claims.(jwt.MapClaims)["iat"] = saveToken.CreatedAt
-		token.Claims.(jwt.MapClaims)["iss"] = iss
-		// Sign and get the complete encoded token as a string
-		tokenString, err := token.SignedString([]byte(viper.Get("JWT_SECRET").(string)))
+		date := jwt.NewNumericDate(saveToken.CreatedAt)
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+			ID:       saveToken.ID,
+			Subject:  sub,
+			IssuedAt: date,
+			Issuer:   iss,
+		})
+
+		// Sign and get the complete encoded token as a string using the secret
+		tokenString, err := token.SignedString([]byte(viper.GetString("JWT_SECRET")))
 		if err == nil {
 			return &tokenString
 		} else {
@@ -121,8 +124,8 @@ func ParseToken(tokenString string) interface{} {
 
 func ValidateToken(tokenString string) *jwt.Token {
 	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod("HS256") != token.Method {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(viper.GetString("JWT_SECRET")), nil
 	})
