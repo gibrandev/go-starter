@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"engine/database"
@@ -21,7 +19,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Middleware
 func Authorization(c *gin.Context) {
 	// Check header exist or not
 	tokenString := c.Request.Header.Get("Authorization")
@@ -176,7 +173,7 @@ func Logout(c *gin.Context) bool {
 	}
 }
 
-func FormatingErrors(err error) map[string]string {
+func FormattingErrors(err error) map[string]string {
 	errors, _ := err.(validator.ValidationErrors)
 	e := make(map[string]string)
 	for _, err := range errors {
@@ -239,14 +236,4 @@ func SendEmail(email string) bool {
 		return false
 	}
 	return true
-}
-
-func GetChatId(query string) string {
-	get := url.URL{
-		RawQuery: query,
-	}
-	value := get.Query()
-	chatId := value["chatId"]
-	str := strings.Join(chatId, ", ")
-	return str
 }

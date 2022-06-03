@@ -35,7 +35,7 @@ func AuthLogin(c *gin.Context) {
 	}
 	err := validate.Struct(data)
 	if err != nil {
-		errorMessage := libs.FormatingErrors(err)
+		errorMessage := libs.FormattingErrors(err)
 		c.JSON(400, errorMessage)
 		return
 	}
@@ -90,7 +90,7 @@ func AuthRegister(c *gin.Context) {
 	// Validation
 	err := validate.Struct(data)
 	if err != nil {
-		errorMessage := libs.FormatingErrors(err)
+		errorMessage := libs.FormattingErrors(err)
 		c.JSON(400, errorMessage)
 		return
 	}
